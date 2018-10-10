@@ -96,30 +96,23 @@ Y_train = Y;
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-load spambase_1.mat
+load ionosphere.mat
 
-[spambase_train,spambase_test,spambase_val] = dividerand(spambase', 0.10,0.90,0);
+X = X';
+X = normc(X);
+%X = (X - mean(X))./std(X);
+Y = Y';
+Y = cell2mat(Y);
+Y = double(Y);
+Y(Y == 103) = +1;
+Y(Y == 98) = -1;
 
-spambase_train = spambase_train';
-spambase_test = spambase_test';
+X_train = X;
+X_test = X;
+Y_train = Y;
+Y_test = Y;
 
-X_train = spambase_train(:, [1:57]);
-Y_train = spambase_train(:, 58);
-X_train = X_train';
-X_train = normc(X_train);
-%X_train = (X_train - mean(X_train))./std(X_train);
-Y_train(Y_train == 1) = +1;
-Y_train(Y_train == 0) = -1;
-Y_train = Y_train';
-
-X_test = spambase_test(:, [1:57]);
-Y_test = spambase_test(:, 58);
-X_test = X_test';
-X_test = normc(X_test);
-%X_test = (X_test - mean(X_test))./std(X_test);
-Y_test(Y_test== 1) = +1;
-Y_test(Y_test == 0) = -1;
-Y_test= Y_test';
+'Training Data has been loaded'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 max_iter = 10^6;
@@ -127,7 +120,7 @@ number_of_experiments = 10;
 
 [data_dim, data_size] = size(X_train);
 lambda1 = 10^(-5);
-lambda2 = 10^(-6);
+lambda2 = 0;
 
 [opt_value, ~] = simple_full_gradient(X_train, Y_train, lambda1, lambda2, max_iter, 10^(-13));
 
@@ -136,30 +129,38 @@ L = 0.25*ones(data_size,1);
 m = ceil(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
-S = 15;
-T = 70;
+S = 10;
+T = 20;
 S_adres = S*T;
-
-obj_value_DASVRDA_sc = zeros(S*T*(m+1) + 1, number_of_experiments);
-obj_value_DASVRDA_adres_sc = zeros(S_adres*(m+1) + 1, number_of_experiments);
-data_passes_DASVRDA_adres_sc = zeros(S_adres*(m+1) + 1, number_of_experiments);
-
-obj_value_DASVRDA_adres_sc_pflug = zeros(S_adres*(m+1) + 1, number_of_experiments);
-data_passes_DASVRDA_adres_sc_pflug = zeros(S_adres*(m+1) + 1, number_of_experiments);
 
 for idx = 1: number_of_experiments
     fprintf('------------------------------EXPERIMENT NO. %d------------------------------\n', idx);
-    [data_passes_DASVRDA_sc, obj_value_DASVRDA_sc(:,idx), w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, lambda1, lambda2,0);
-    [data_passes_DASVRDA_adres_sc, obj_value_DASVRDA_adres_sc(:,idx), w_DASVRDA_adres_sc] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, lambda1, lambda2, 0);
-    [data_passes_DASVRDA_adres_sc_pflug, obj_value_DASVRDA_adres_sc_pflug(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, lambda1, lambda2, 1);
+    [data_passes_DASVRDA_sc, time_passes_DASVRDA_sc(:,idx), obj_value_DASVRDA_sc(:,idx), w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, lambda1, lambda2,0);
+    [data_passes_DASVRDA_adres_sc, time_passes_DASVRDA_adres_sc(:,idx), obj_value_DASVRDA_adres_sc(:,idx), w_DASVRDA_adres_sc] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, lambda1, lambda2, 0);
+    [data_passes_DASVRDA_adres_sc_pflug, time_passes_DASVRDA_adres_sc_pflug(:,idx), obj_value_DASVRDA_adres_sc_pflug(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, lambda1, lambda2, 1);
    %[data_passes_DASVRDA_sc_pflug, obj_value_DASVRDA_sc_pflug(:,idx), w_DASVRDA_sc_pflug] = DASVRDA_sc(X_train, Y_train, x_invhat, omega, L, m, b, S, T, lambda1, lambda, 1);
-end 
+end
 
 figure
-p1 = semilogy(data_passes_DASVRDA_sc, mean(obj_value_DASVRDA_sc',1) - opt_value, data_passes_DASVRDA_adres_sc, mean(obj_value_DASVRDA_adres_sc',1) - opt_value, data_passes_DASVRDA_adres_sc_pflug, mean(obj_value_DASVRDA_adres_sc_pflug',1) - opt_value);
+p1 = semilogy(mean(time_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc',1) - opt_value, mean(time_passes_DASVRDA_adres_sc',1), mean(obj_value_DASVRDA_adres_sc',1) - opt_value, mean(time_passes_DASVRDA_adres_sc_pflug',1), mean(obj_value_DASVRDA_adres_sc_pflug',1) - opt_value);
 p1(1).LineWidth = 2.5;
 p1(2).LineWidth = 2.5;
 p1(3).LineWidth = 2.5;
+
+title(['Performance of DASVRDA sc']);
+xlabel('time in seconds');
+ylabel('objective gap P(x) - P(x*)');
+DASVRDA_legend = ['DASVRDA sc'];
+DASVRDA_adres_legend = ['DASVRDA adap grad restart sc'];
+DASVRDA_adres_pflug_legend = ['DASVRDA adap grad restart sc w/ pflug'];
+legend(DASVRDA_legend, DASVRDA_adres_legend, DASVRDA_adres_pflug_legend);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+figure
+p2 = semilogy(data_passes_DASVRDA_sc, mean(obj_value_DASVRDA_sc',1) - opt_value, data_passes_DASVRDA_adres_sc, mean(obj_value_DASVRDA_adres_sc',1) - opt_value, data_passes_DASVRDA_adres_sc_pflug, mean(obj_value_DASVRDA_adres_sc_pflug',1) - opt_value);
+p2(1).LineWidth = 2.5;
+p2(2).LineWidth = 2.5;
+p2(3).LineWidth = 2.5;
 
 title(['Performance of DASVRDA sc']);
 xlabel('#(gradients computed)/n');

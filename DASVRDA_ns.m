@@ -1,12 +1,11 @@
-function  [data_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, lambda1, lambda2, pflug_boolean)
+function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, lambda1, lambda2, pflug_boolean)
 
     [data_dim, data_size] = size(X_train);
     
-    x_tilde_previous = zeros(data_dim, 1);
-    y_tilde = zeros(data_dim, 1);
-    
     obj_value = zeros(S*(1 + m) + 1, 1);
     data_passes = zeros(S*(1 + m) + 1, 1);
+    time_passes = zeros(S*(1 + m) + 1, 1);
+    
     count = 1;
     obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
     
@@ -14,7 +13,6 @@ function  [data_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
     theta_tilde = 1.0 - 1.0/omega;
     L_bar = sum(L)*1.0/data_size;
     eta = 1.0/((1 + omega*(m+1)/b)*L_bar);
-    full_gradient = zeros(data_dim,1);
     
     if(pflug_boolean == 0)
         eta = 5*10^(0);
@@ -24,17 +22,21 @@ function  [data_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
     tau = 0;
     burnin = floor(S*(1 + m)/10.0);
     
+    tic
     for s = 1:S
         count = count + 1;
-        data_passes(count) = data_passes(count-1) + 1;
-        obj_value(count) = obj_value(count-1);
         
         theta_tilde_previous = theta_tilde;
         theta_tilde = (1.0 - 1.0/omega)*(s+2)*0.5;
         y_tilde = x_tilde + (theta_tilde_previous - 1)/theta_tilde * (x_tilde - x_tilde_previous) + theta_tilde_previous/theta_tilde * (z_tilde - x_tilde);
         
         [full_gradient, eachComponent] = FullLogR2Gradient_eachComponent(0, x_tilde, X_train, Y_train);
-        fprintf('DASVRDA_ns completion porcentage = %3.2f, obj = %3.10f\n',100*s/S, obj_value(count));
+        
+        time_passes(count) = toc;
+        data_passes(count) = data_passes(count-1) + 1;
+        obj_value(count) = obj_value(count-1);
+        
+        %fprintf('DASVRDA_ns completion porcentage = %3.2f, obj = %3.10f\n',100*s/S, obj_value(count));
       
         x = y_tilde;
         z = y_tilde;
@@ -43,8 +45,6 @@ function  [data_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
         x_tilde_previous = x_tilde;
         for k = 1:m
             count = count + 1;
-            
-            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
             
             x_previous = x;
             z_previous = z;
@@ -80,6 +80,9 @@ function  [data_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
                     tau = (s-1)*m + k;
                 end
             end
+            
+            time_passes(count) = toc;
+            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
             
             obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
         end

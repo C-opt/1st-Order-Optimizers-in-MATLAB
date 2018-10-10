@@ -1,4 +1,4 @@
-function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, lambda1, lambda2, pflug_boolean)
+function  [data_passes, time_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, lambda1, lambda2, pflug_boolean)
     
 
     [data_dim, data_size] = size(X_train);
@@ -8,6 +8,8 @@ function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_til
     
     obj_value = zeros(S*(1 + m) + 1, 1);
     data_passes = zeros(S*(1 + m) + 1, 1);
+    time_passes = zeros(S*(1 + m) + 1, 1);
+    
     count = 1;
     obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
     z_tilde = x_tilde;
@@ -21,13 +23,13 @@ function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_til
     S_pflug = 0;
     tau = 0;
     burnin = floor(1.0*S*(1 + m)/10.0);
-    
+    tic
     for s = 1: S
         count = count + 1;
-        data_passes(count) = data_passes(count-1) + 1;
         obj_value(count) = obj_value(count-1);
 
         theta_tilde_previous = theta_tilde;
+        
         theta_tilde = (1.0 - 1.0/omega)*(s+2)*0.5;
         y_tilde_previous = y_tilde;
         y_tilde = x_tilde + (theta_tilde_previous - 1)/theta_tilde * (x_tilde - x_tilde_previous) + theta_tilde_previous/theta_tilde * (z_tilde - x_tilde);
@@ -36,8 +38,11 @@ function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_til
            theta_tilde =  1.0 - 1.0/omega;
         end
         
+        time_passes(count) = toc;
+        data_passes(count) = data_passes(count-1) + 1;
+        
         [full_gradient, eachComponent] = FullLogR2Gradient_eachComponent(0, x_tilde, X_train, Y_train);
-        fprintf('DASVRDA_ns completion porcentage = %3.2f, obj = %3.10f\n',100*s/S, obj_value(count));
+        %fprintf('DASVRDA_ns completion porcentage = %3.2f, obj = %3.10f\n',100*s/S, obj_value(count));
       
         x = y_tilde;
         z = y_tilde;
@@ -47,7 +52,6 @@ function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_til
         for k = 1: m
             count = count + 1;
             
-            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
             
             x_previous = x;
             z_previous = z;
@@ -85,6 +89,9 @@ function  [data_passes, obj_value, w] = DASVRDA_adres_sc(X_train, Y_train, x_til
                     tau = (s-1)*m + k;
                 end
             end
+            
+            time_passes(count) = toc;
+            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
             
             obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
         end
