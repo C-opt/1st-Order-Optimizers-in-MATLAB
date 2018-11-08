@@ -1,6 +1,6 @@
-function  [data_passes, time_passes, obj_value, w] = DASVRDA_sc(X_train, Y_train, x_invhat, omega, L, m, b, S, T, lambda1, lambda2, pflug_boolean)
+function  [data_passes, time_passes, obj_value, w] = DASVRDA_sc(X_train, Y_train, x_invhat, omega, L, m, b, S, T, eta, lambda1, lambda2, experiment_boolean)
     
-    [data_dim, data_size] = size(X_train);
+    [~, data_size] = size(X_train);
     obj_value = zeros(T*S*(1 + m) + 1, 1);
     data_passes = zeros(T*S*(1 + m) + 1, 1);
     time_passes = zeros(T*S*(1 + m) + 1, 1);
@@ -20,7 +20,7 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_sc(X_train, Y_train
     
     for t = 1: T
         tic
-        [~, tmp, obj_value((t-1)*S*(1 + m) + 1: t*S*(1 + m) + 1,:), x_invhat] = DASVRDA_ns(X_train, Y_train, x_invhat, x_invhat, omega, L, m, b, S, lambda1, lambda2, pflug_boolean);
+        [~, tmp, obj_value((t-1)*S*(1 + m) + 1: t*S*(1 + m) + 1,:), x_invhat] = DASVRDA_ns(X_train, Y_train, x_invhat, x_invhat, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean);
         tmp = tmp + t2;
         t2 = t2 + toc;
         time_passes((t-1)*S*(1+m)+1:t*S*(1+m)+1,:) = tmp;
