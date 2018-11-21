@@ -5,13 +5,12 @@ function [obj_value, w] = optimizer_APG(X, Y, w, lambda1, lambda2, max_iter, eps
     t_prev = 1;
     tic;
     
-    gradient = prox_map(FullLogR2Gradient(0, w, X, Y), lambda1, lambda2);
-    abs_grad = norm(gradient);
-    
+    abs_grad = epsilon + 1;
     t = 1;
     while (t <= max_iter) && (abs_grad > epsilon)
-
-        w = prox_map(y - 4.0*FullLogR2Gradient(0, y, X, Y), 4.0*lambda1, 4.0*lambda2);
+        
+        [grad, ~] = FullLogR2Gradient_eachComponent(0, y, X, Y);
+        w = prox_map(y - 4.0*grad, 4.0*lambda1, 4.0*lambda2);
         abs_grad = norm(w - w_prev);
         t_curr = 0.5*(1 + sqrt(1 + 4*t_prev*t_prev));
         y = w + 1.0*(t_prev - 1)/t_curr * (w - w_prev);

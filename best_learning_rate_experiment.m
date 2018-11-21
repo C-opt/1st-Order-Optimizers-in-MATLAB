@@ -1,89 +1,82 @@
 clc; clear; close;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-load spambase_1.mat
 
-[spambase_train,spambase_test,spambase_val] = dividerand(spambase', 0.01,0.99,0);
+addpath 'datasets'
+load sido0_train
+Y = X(:,4932)';
+Y(Y==0) = -1;
+X = X(:,1:4931)';
+X = normc(X);
+%X = (X - mean(X))./std(X);
 
-spambase_train = spambase_train';
-spambase_test = spambase_test';
+X_train = X;
+Y_train = Y;
 
-X_train = spambase_train(:, [1:57]);
-Y_train = spambase_train(:, 58);
-X_train = X_train';
-X_train = normc(X_train);
-%X_train = (X_train - mean(X_train))./std(X_train);
-Y_train(Y_train == 1) = +1;
-Y_train(Y_train == 0) = -1;
-Y_train = Y_train';
-
-X_test = spambase_test(:, [1:57]);
-Y_test = spambase_test(:, 58);
-X_test = X_test';
-X_test = normc(X_test);
-%X_test = (X_test - mean(X_test))./std(X_test);
-Y_test(Y_test== 1) = +1;
-Y_test(Y_test == 0) = -1;
-Y_test= Y_test';
+'Training Data has been loaded'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 max_iter = 10^6;
-number_of_experiments = 10;
+number_of_experiments = 40;
 
 [data_dim, data_size] = size(X_train);
-lambda1 = 0;
-lambda2 = 10^(-6);
-
-[opt_value, ~] = simple_full_gradient(X_train, Y_train, lambda1, lambda2, max_iter, 10^(-11));
+lambda1 = 10^(-4);
+lambda2 = 0;z
 
 b = ceil(sqrt(data_size));
 L = 0.25*ones(data_size,1);
 m = ceil(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
-S = 10;
-T = 50;
+S = 40;
+T = 4;
 S_adres = S*T;
 
-for idx = 1: number_of_experiments
+detail_lvl = 0.10;
+
+[~, ~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, 40, 10, 5*10^(0), lambda1, lambda2, 0, detail_lvl);
+[opt_value, w] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
+
+parfor idx = 1: number_of_experiments
     fprintf('------------------------------EXPERIMENT NO. %d------------------------------\n', idx);
-    [data_passes_DASVRDA_sc, ~, obj_value_DASVRDA_sc_1(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(-2), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_2(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 2*10^(-2), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_3(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 5*10^(-2), lambda1, lambda2, 0);
+                                                                    %DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, 5*10^(0), lambda1, lambda2, 1, 0.15);
+    [~, time_passes_DASVRDA_sc_1(:,idx), obj_value_DASVRDA_sc_1(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 1*10^(-2), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_2(:,idx), obj_value_DASVRDA_sc_2(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 2*10^(-2), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_3(:,idx), obj_value_DASVRDA_sc_3(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 5*10^(-2), lambda1, lambda2, 1, detail_lvl);
     
-    [~, ~, obj_value_DASVRDA_sc_4(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(-1), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_5(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 2*10^(-1), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_6(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 5*10^(-1), lambda1, lambda2, 0);
+    [~, time_passes_DASVRDA_sc_4(:,idx), obj_value_DASVRDA_sc_4(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 1*10^(-1), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_5(:,idx), obj_value_DASVRDA_sc_5(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 2*10^(-1), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_6(:,idx), obj_value_DASVRDA_sc_6(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 5*10^(-1), lambda1, lambda2, 1, detail_lvl);
     
-    [~, ~, obj_value_DASVRDA_sc_7(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(0), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_8(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 2*10^(0), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_9(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 5*10^(0), lambda1, lambda2, 0);
+    [~, time_passes_DASVRDA_sc_7(:,idx), obj_value_DASVRDA_sc_7(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 1*10^(0), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_8(:,idx), obj_value_DASVRDA_sc_8(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 2*10^(0), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_9(:,idx), obj_value_DASVRDA_sc_9(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 5*10^(0), lambda1, lambda2, 0, detail_lvl);
     
-    [~, ~, obj_value_DASVRDA_sc_10(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(1), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_11(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 2*10^(1), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_12(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 5*10^(1), lambda1, lambda2, 0);
+    [~, time_passes_DASVRDA_sc_10(:,idx), obj_value_DASVRDA_sc_10(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 1*10^(1), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_11(:,idx), obj_value_DASVRDA_sc_11(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 2*10^(1), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_12(:,idx), obj_value_DASVRDA_sc_12(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 5*10^(1), lambda1, lambda2, 1, detail_lvl);
     
-    [~, ~, obj_value_DASVRDA_sc_13(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(2), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_14(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 2*10^(2), lambda1, lambda2, 0);
-    [~, ~, obj_value_DASVRDA_sc_15(:,idx), ~] = DASVRDA_adres_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 5*10^(2), lambda1, lambda2, 0);
+    [~, time_passes_DASVRDA_sc_13(:,idx), obj_value_DASVRDA_sc_13(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 1*10^(2), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_14(:,idx), obj_value_DASVRDA_sc_14(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 2*10^(2), lambda1, lambda2, 1, detail_lvl);
+    [~, time_passes_DASVRDA_sc_15(:,idx), obj_value_DASVRDA_sc_15(:,idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, 5*10^(2), lambda1, lambda2, 1, detail_lvl);
 end
 
 figure
-gr1 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_1',1) - opt_value); hold on;
-gr2 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_2',1) - opt_value); hold on;
-gr3 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_3',1) - opt_value); hold on;
-gr4 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_4',1) - opt_value);  hold on;
-gr5 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_5',1) - opt_value); hold on;
-gr6 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_6',1) - opt_value); hold on;
-gr7 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_7',1) - opt_value); hold on;
-gr8 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_8',1) - opt_value); hold on;
-gr9 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_9',1) - opt_value); hold on;
-gr10 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_10',1) - opt_value); hold on; 
-gr11 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_11',1) - opt_value); hold on;
-gr12 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_12',1) - opt_value); hold on;
-gr13 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_13',1) - opt_value); hold on;
-gr14 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_14',1) - opt_value); hold on;
-gr15 = semilogy(mean(data_passes_DASVRDA_sc',1), mean(obj_value_DASVRDA_sc_15',1) - opt_value); hold on;
+gr1 = semilogy(mean(time_passes_DASVRDA_sc_1',1), mean(obj_value_DASVRDA_sc_1',1) - opt_value); hold on;
+gr2 = semilogy(mean(time_passes_DASVRDA_sc_2',1), mean(obj_value_DASVRDA_sc_2',1) - opt_value); hold on;
+gr3 = semilogy(mean(time_passes_DASVRDA_sc_3',1), mean(obj_value_DASVRDA_sc_3',1) - opt_value); hold on;
+gr4 = semilogy(mean(time_passes_DASVRDA_sc_4',1), mean(obj_value_DASVRDA_sc_4',1) - opt_value);  hold on;
+gr5 = semilogy(mean(time_passes_DASVRDA_sc_5',1), mean(obj_value_DASVRDA_sc_5',1) - opt_value); hold on;
+gr6 = semilogy(mean(time_passes_DASVRDA_sc_6',1), mean(obj_value_DASVRDA_sc_6',1) - opt_value); hold on;
+gr7 = semilogy(mean(time_passes_DASVRDA_sc_7',1), mean(obj_value_DASVRDA_sc_7',1) - opt_value); hold on;
+gr8 = semilogy(mean(time_passes_DASVRDA_sc_8',1), mean(obj_value_DASVRDA_sc_8',1) - opt_value); hold on;
+gr9 = semilogy(mean(time_passes_DASVRDA_sc_9',1), mean(obj_value_DASVRDA_sc_9',1) - opt_value); hold on;
+gr10 = semilogy(mean(time_passes_DASVRDA_sc_10',1), mean(obj_value_DASVRDA_sc_10',1) - opt_value); hold on; 
+gr11 = semilogy(mean(time_passes_DASVRDA_sc_11',1), mean(obj_value_DASVRDA_sc_11',1) - opt_value); hold on;
+gr12 = semilogy(mean(time_passes_DASVRDA_sc_12',1), mean(obj_value_DASVRDA_sc_12',1) - opt_value); hold on;
+gr13 = semilogy(mean(time_passes_DASVRDA_sc_13',1), mean(obj_value_DASVRDA_sc_13',1) - opt_value); hold on;
+gr14 = semilogy(mean(time_passes_DASVRDA_sc_14',1), mean(obj_value_DASVRDA_sc_14',1) - opt_value); hold on;
+gr15 = semilogy(mean(time_passes_DASVRDA_sc_15',1), mean(obj_value_DASVRDA_sc_15',1) - opt_value); hold on;
 
 set(gr1(1), 'linewidth', 2.5);
 set(gr2(1), 'linewidth', 2.5);

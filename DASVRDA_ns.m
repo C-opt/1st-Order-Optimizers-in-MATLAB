@@ -1,10 +1,10 @@
-function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean)
+function  [time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
 
     [data_dim, data_size] = size(X_train);
+    innerPt_no = min(floor(sqrt(m)), innerPt_no);
     
-    obj_value = zeros(S*(1 + m) + 1, 1);
-    data_passes = zeros(S*(1 + m) + 1, 1);
-    time_passes = zeros(S*(1 + m) + 1, 1);
+    obj_value = zeros(S*(1 + innerPt_no) +1, 1);
+    time_passes = zeros(S*(1 + innerPt_no) +1, 1);
     
     count = 1;
     if experiment_boolean == 1
@@ -16,7 +16,6 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train
     
     tic
     for s = 1:S
-        count = count + 1;
         
         theta_tilde_previous = theta_tilde;
         theta_tilde = (1.0 - 1.0/omega)*(s+2)*0.5;
@@ -24,8 +23,8 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train
         
         [full_gradient, eachComponent] = FullLogR2Gradient_eachComponent(0, x_tilde, X_train, Y_train);
         
+        count = count + 1;
         time_passes(count) = toc;
-        data_passes(count) = data_passes(count-1) + 1;
         
         if experiment_boolean == 1
             obj_value(count) = obj_value(count-1);
@@ -37,7 +36,6 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train
         theta = 0.5;
         x_tilde_previous = x_tilde;
         for k = 1:m
-            count = count + 1;
             
             x_previous = x;
             z_previous = z;
@@ -56,11 +54,13 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
             x = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z;
             
-            time_passes(count) = toc;
-            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
-            
-            if experiment_boolean == 1
-                obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+            if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
+                count = count + 1;
+                time_passes(count) = toc;
+
+                if experiment_boolean == 1
+                    obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+                end
             end
         end
         x_tilde = x;

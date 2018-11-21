@@ -1,12 +1,13 @@
-function  [data_passes, time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, eta, lambda1, lambda2)
+function  [time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, eta, lambda1, lambda2, innerPt_no)
     
 
     [data_dim, data_size] = size(X_train);
     y_tilde = zeros(data_dim, 1);
+
+    innerPt_no = min(floor(sqrt(m)), innerPt_no);
     
-    obj_value = zeros(S*(1 + m) + 1, 1);
-    data_passes = zeros(S*(1 + m) + 1, 1);
-    time_passes = zeros(S*(1 + m) + 1, 1);
+    obj_value = zeros(S*(1 + innerPt_no) + 1, 1);
+    time_passes = zeros(S*(1 + innerPt_no) + 1, 1);
     
     count = 1;
     obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
@@ -34,24 +35,19 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_s
         end
         
         time_passes(count) = toc;
-        data_passes(count) = data_passes(count-1) + 1;
-        
         [full_gradient, eachComponent] = FullLogR2Gradient_eachComponent(0, x_tilde, X_train, Y_train);
-        %fprintf('DASVRDA_ns completion porcentage = %3.2f, obj = %3.10f\n',100*s/S, obj_value(count));
       
         x = y_tilde;
         z = y_tilde;
         g_bar = zeros(data_dim,1);
-        g_bar_previous = g_bar;
         theta = 0.5;
+        z_previous = z;
         x_tilde_previous = x_tilde;
-        x_previous = x;
+        
         for k = 1: m
-            count = count + 1;
-            x_previous_previous = x_previous;
+            z_previous_previous = z_previous;
             x_previous = x;
             z_previous = z;
-            g_bar_previous_previous = g_bar_previous;
             g_bar_previous = g_bar;
             
             theta_previous = theta;
@@ -67,37 +63,25 @@ function  [data_passes, time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_s
             g_bar = (1.0 - 1.0/theta)*g_bar_previous + 1.0/theta * g;
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
             x = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z;
-            %(norm(x_previous_previous - x_previous)*norm(x_previous - x))
-            if(k > 1)
-                %S_pflug = S_pflug + 1.0*((g_bar_previous_previous - g_bar_previous)'*(g_bar_previous - g_bar))/(norm(g_bar_previous_previous - g_bar_previous)*norm(g_bar_previous - g_bar));
-                S_pflug = S_pflug + 1.0*((g_bar_previous_previous - g_bar_previous)'*(g_bar_previous - g_bar))/(norm(g_bar_previous_previous - g_bar_previous)*norm(g_bar_previous - g_bar));
-                %fprintf("<> = %4.4f\n", ((x_previous_previous - x_previous)'*(x_previous - x))/(eta^2));
-                %if (s-1)*m + k > tau + burnin
-                    if S_pflug < 0
-                        %theta = 0.5;
-                        %eta = eta*0.9;
-                    elseif S_pflug > 0
-                        %eta = eta*1.1;
-                    end
-                    %S_pflug = 0;
-                    %tau = (s-1)*m + k;
-                %end
-            end
-            time_passes(count) = toc;
-            data_passes(count) = data_passes(count-1) + 1.0*b/data_size;
             
-            obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+             if(k > 1)   
+                 S_pflug = S_pflug + 1.0*((z_previous - z_previous_previous)'*(z - z_previous_previous))/(norm(z - z_previous_previous)*norm(z_previous - z_previous_previous));
+             end
+              if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
+                count = count + 1;
+                time_passes(count) = toc;
+                obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+             end
         end
+
+%         fprintf("---S_pflug = %4.4f eta = %4.2f \n", S_pflug/m, eta);
+        S_pflug = S_pflug/m;
         
-        %fprintf("S_pflug = %4.4f eta = %4.2f \n", S_pflug, eta);
-        if S_pflug < 0
-            %theta = 0.5;
-            eta = eta*(1 + S_pflug/m);
-        elseif S_pflug > 0
-            eta = eta*(1 + S_pflug/m);
+        if S_pflug < 0.65
+            eta = eta*(1 - 0.1);
+        elseif S_pflug > 0.85
+            eta = eta*(1 + 0.1);
         end
-        %S_pflug = 0;
-        
         x_tilde = x;
         z_tilde = z;
         
