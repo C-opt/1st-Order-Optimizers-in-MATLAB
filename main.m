@@ -1,6 +1,8 @@
 clc; clear; close;
 
-load_spambase;
+output_filename = ('./output/template.jpg');
+
+load_MNIST;
 fprintf('Training Data has been loaded\n');
 
 max_iter = 10^6;
@@ -42,7 +44,6 @@ p2 = semilogy(data_passes_DASVRDA_sc, mean(obj_value_DASVRDA_sc',1) - opt_value,
 p2(1).LineWidth = 2.5;
 p2(2).LineWidth = 2.5;
 p2(3).LineWidth = 2.5;
-%axis([0 730 0 1.1]);
 
 title(['Experiments']);
 xlabel('#(gradients computed)/n');
@@ -51,7 +52,7 @@ DASVRDA_legend = ['Periodic Restart DASVRDA'];
 DASVRDA_adres_legend = ['Adaptative Restart DASVRDA'];
 DASVRDA_adres_pflug_legend = ['Pflug + DASRVDA'];
 legend(DASVRDA_legend, DASVRDA_adres_legend, DASVRDA_adres_pflug_legend);
-saveas(gcf,'./output/template.jpg')
+saveas(gcf,output_filename)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % figure
