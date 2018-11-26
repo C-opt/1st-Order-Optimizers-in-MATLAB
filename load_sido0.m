@@ -7,5 +7,3 @@ X = normc(X);
 
 X_train = X;
 Y_train = Y;
-clear X_train
-clear Y_train

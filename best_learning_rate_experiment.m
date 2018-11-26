@@ -3,7 +3,7 @@ max_iter = 10^6;
 number_of_experiments = 40;
 
 [data_dim, data_size] = size(X_train);
-lambda1 = 0;
+lambda1 = 10^(-4);
 lambda2 = 10^(-6);
 
 b = ceil(sqrt(data_size));
@@ -18,7 +18,7 @@ S_adres = S*T;
 innerPt_no = 3;
 
 [~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, 40, 10, 5*10^(0), lambda1, lambda2, 0, innerPt_no);
-[opt_value, w] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
+[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
 
 data_passes_DASVRDA_sc = DASVRDA_dataPass(data_size, m, b, S, T, innerPt_no);
 
