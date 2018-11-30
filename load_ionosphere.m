@@ -1,4 +1,5 @@
 load ionosphere
+fprintf('ionosphere data has been loaded\n');
 
 X = X';
 X = normc(X);

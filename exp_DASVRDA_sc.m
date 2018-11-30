@@ -1,17 +1,7 @@
-clc; clear; close;
-
-output_filename = ('./output/template.jpg');
-
-load_MNIST;
-fprintf('Training Data has been loaded\n');
-
 max_iter = 10^6;
-number_of_experiments = 20;
 
 [data_dim, data_size] = size(X_train);
-lambda1 = 0;
-lambda2 = 10^(-6);
-    
+
 b = floor(sqrt(data_size));
 L = 0.25*ones(data_size,1);
 m = floor(1.0*data_size/b);
@@ -21,10 +11,8 @@ S = 20;
 T = 3;
 S_adres = S*T;
 
-innerPt_no = 7;
-
-[~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, 10, 1*10^(1), lambda1, lambda2, 0, innerPt_no);
-[opt_value, w] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
+[~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, 10, eta1, lambda1, lambda2, 0, innerPt_no);
+[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
 
 data_passes_DASVRDA_sc = DASVRDA_dataPass(data_size, m, b, S, T, innerPt_no);
 data_passes_DASVRDA = DASVRDA_dataPass(data_size, m, b, S_adres, 1, innerPt_no);
@@ -34,9 +22,9 @@ opt_eta = 1.0/((1 + omega*(m+1)/b)*L_bar);
 
 parfor idx = 1: number_of_experiments
     fprintf('------------------------------EXPERIMENT NO. %d------------------------------\n', idx);
-    [time_passes_DASVRDA_sc(:,idx), obj_value_DASVRDA_sc(:,idx), w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, 1*10^(1), lambda1, lambda2, 1, innerPt_no);
-    [time_passes_DASVRDA_adres_sc(:,idx), obj_value_DASVRDA_adres_sc(:,idx), w_DASVRDA_adres_sc] = DASVRDA_adapRestart_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(1), lambda1, lambda2, innerPt_no);
-    [time_passes_DASVRDA_adres_sc_pflug(:,idx), obj_value_DASVRDA_adres_sc_pflug(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, 1*10^(1), lambda1, lambda2, innerPt_no); 
+    [time_passes_DASVRDA_sc(:,idx), obj_value_DASVRDA_sc(:,idx), w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, eta1, lambda1, lambda2, 1, innerPt_no);
+    [time_passes_DASVRDA_adres_sc(:,idx), obj_value_DASVRDA_adres_sc(:,idx), w_DASVRDA_adres_sc] = DASVRDA_adapRestart_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, eta2, lambda1, lambda2, innerPt_no);
+    [time_passes_DASVRDA_adres_sc_pflug(:,idx), obj_value_DASVRDA_adres_sc_pflug(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S_adres, eta3, lambda1, lambda2, innerPt_no); 
 end
 
 figure

@@ -1,8 +1,8 @@
 addpath 'datasets'
 load spambase.data
+fprintf('spambase data has been loaded\n');
 
 [X_train,X_test,X_val] = dividerand(spambase',1,0,0);
-
 
 Y_train = X_train(58, :);
 X_train = X_train([1:57], :);
