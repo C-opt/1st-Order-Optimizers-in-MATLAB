@@ -4,7 +4,7 @@ number_of_experiments = 40;
 
 [data_dim, data_size] = size(X_train);
 lambda1 = 10^(-4);
-lambda2 = 10^(-6);
+lambda2 = 0;
 
 b = ceil(sqrt(data_size));
 L = 0.25*ones(data_size,1);
@@ -12,7 +12,7 @@ m = ceil(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
 S = 20;
-T = 3;
+T = 1;
 S_adres = S*T;
 
 innerPt_no = 3;
@@ -45,7 +45,7 @@ for eta_idx = 1:size(eta, 2)
     fprintf('eta = %1.2f\n', tmp_eta);
     parfor exp_idx = 1: number_of_experiments
 %         fprintf('---EXPERIMENT NO. %d---\n', exp_idx);
-        [time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, tmp_eta, lambda1, lambda2, 1, innerPt_no);
+        [time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, tmp_eta, lambda1, lambda2, 1, innerPt_no);
     end
     mean_1 = mean(obj_value_DASVRDA_sc_1, 2);
     
