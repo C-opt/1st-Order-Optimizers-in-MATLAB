@@ -77,9 +77,9 @@ function  [time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_sc(X_train, Y_
 %         fprintf("---S_pflug = %4.4f eta = %4.2f \n", S_pflug/m, eta);
         S_pflug = S_pflug/m;
         
-        if S_pflug < 0.60
+        if S_pflug < 0.25
             eta = eta*(1 - 0.1);
-        elseif S_pflug > 0.85
+        elseif S_pflug > 0.90
             eta = eta*(1 + 0.1);
         end
         x_tilde = x;

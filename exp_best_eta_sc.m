@@ -1,17 +1,15 @@
+rng('shuffle');
 
 max_iter = 10^6;
-number_of_experiments = 40;
 
 [data_dim, data_size] = size(X_train);
-lambda1 = 10^(-4);
-lambda2 = 0;
 
 b = ceil(sqrt(data_size));
 L = 0.25*ones(data_size,1);
 m = ceil(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
-S = 20;
+S = 500;
 T = 1;
 S_adres = S*T;
 
@@ -38,6 +36,7 @@ ylabel('objective gap P(x) - P(x*)');
 min_idx = -1;
 min_mean = obj_logreg_r1r2(lambda1, lambda2, zeros(data_dim, 1), X_train, Y_train);
 last_idx = T*S*(innerPt_no+1)+1;
+Legend = cell(size(eta, 2),1);
 
 for eta_idx = 1:size(eta, 2)
     tmp_eta = eta(eta_idx);
@@ -45,7 +44,7 @@ for eta_idx = 1:size(eta, 2)
     fprintf('eta = %1.2f\n', tmp_eta);
     parfor exp_idx = 1: number_of_experiments
 %         fprintf('---EXPERIMENT NO. %d---\n', exp_idx);
-        [time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, tmp_eta, lambda1, lambda2, 1, innerPt_no);
+        [time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_adapRestart_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, tmp_eta, lambda1, lambda2, innerPt_no);
     end
     mean_1 = mean(obj_value_DASVRDA_sc_1, 2);
     
@@ -54,9 +53,11 @@ for eta_idx = 1:size(eta, 2)
        min_idx = eta_idx;
     end
     
-    gr1 = semilogy(data_passes_DASVRDA_sc, mean_1 - opt_value);  hold on;
-    set(gr1(1), 'linewidth', 2.5);
+    Legend{eta_idx} = num2str(eta_idx);
+    gr1 = semilogy(data_passes_DASVRDA_sc, mean_1 - opt_value); hold on;
+    set(gr1(1), 'linewidth', 25.0/eta_idx);
 end
+legend(Legend);
 title(['Performance of DASVRDA (min idx = ' num2str(min_idx) ')']);
 saveas(gcf,output_filename)
 hold off

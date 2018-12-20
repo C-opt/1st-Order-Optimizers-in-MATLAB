@@ -73,9 +73,9 @@ function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_til
         
         S_pflug = S_pflug/m;
         
-        if S_pflug < 0.60
+        if S_pflug < 0.25
             eta = eta*(1 - 0.1);
-        elseif S_pflug > 0.85
+        elseif S_pflug > 0.90
             eta = eta*(1 + 0.1);
         end
         

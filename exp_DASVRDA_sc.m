@@ -7,7 +7,7 @@ L = 0.25*ones(data_size,1);
 m = floor(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
-S = 20;
+S = 100;
 T = 3;
 S_adres = S*T;
 
