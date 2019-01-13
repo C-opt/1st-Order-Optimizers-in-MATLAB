@@ -1,9 +1,11 @@
-function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
+function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
 
     [data_dim, data_size] = size(X_train);
     innerPt_no = min(floor(sqrt(m)), innerPt_no);
     
     obj_value = zeros(S*(1 + innerPt_no) +1, 1);
+    all_S_pflug = zeros(S, 1);
+    all_eta = zeros(S,1);
     time_passes = zeros(S*(1 + innerPt_no) +1, 1);
     
     count = 1;
@@ -13,6 +15,8 @@ function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_til
     
     x_tilde_previous = z_tilde;
     theta_tilde = 1.0 - 1.0/omega;
+    
+    burnin = floor(m-1);
     
     tic
     for s = 1:S
@@ -36,10 +40,12 @@ function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_til
         g_bar = zeros(data_dim,1);
         theta = 0.5;
         z_previous = z;
+        x_previous = x;
         x_tilde_previous = x_tilde;
+        tau = 0;
         for k = 1:m
-            
             z_previous_previous = z_previous;
+            x_previous_previous = x_previous; 
             x_previous = x;
             z_previous = z;
             g_bar_previous = g_bar;
@@ -57,10 +63,29 @@ function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_til
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
             x = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z;
                          
-            if(k > 1)   
-                 S_pflug = S_pflug + 1.0*((z_previous - z_previous_previous)'*(z - z_previous_previous))/(norm(z - z_previous_previous)*norm(z_previous - z_previous_previous)); 
+            if(k > 1)
+                term1 = ((x_previous - x_previous_previous)'*(x - x_previous))/(norm(x - x_previous)*norm(x_previous - x_previous_previous));
+                term2 = ((z_previous - z_previous_previous)'*(z - z_previous))/(norm(z - z_previous)*norm(z_previous - z_previous_previous));
+                S_pflug = S_pflug + 0.0*term1 + 1.0*term2;
+                %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
             end
             
+            if(k > tau + burnin)
+                S_pflug = S_pflug/k;
+                all_S_pflug(s) = S_pflug;
+                all_eta(s) = eta;
+                UB = 0.90;
+                LB = 0.10;
+
+                if S_pflug < LB
+                    eta = eta*0.9;
+                elseif S_pflug > UB
+                    eta = eta*1.1;
+                end
+                S_pflug = 0;
+                tau = k;
+             end
+
             if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
                 count = count + 1;
                 time_passes(count) = toc;
@@ -69,14 +94,6 @@ function  [time_passes, obj_value, w] = DASVRDA_pflug_ns(X_train, Y_train, x_til
                     obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
                 end
             end
-        end
-        
-        S_pflug = S_pflug/m;
-        
-        if S_pflug < 0.25
-            eta = eta*(1 - 0.1);
-        elseif S_pflug > 0.90
-            eta = eta*(1 + 0.1);
         end
         
         x_tilde = x;

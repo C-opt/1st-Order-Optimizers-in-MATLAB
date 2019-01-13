@@ -1,52 +1,52 @@
+clc; clear; close;
+number_of_experiments = 50;
+lambda1 = 0;
+lambda2 = 10^(-6);
+output_filename = ('./output/best_eta_adap_ionosphere_1.jpg');
+load_ionosphere;
+exp_best_eta_sc
+
+clc; clear; close;
+number_of_experiments = 50;
+lambda1 = 10^(-4);
+lambda2 = 10^(-6);
+output_filename = ('./output/best_eta_adap_ionosphere_2.jpg');
+load_ionosphere;
+exp_best_eta_sc
+
+% 
 % clc; clear; close;
 % number_of_experiments = 50;
 % lambda1 = 0;
 % lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_adap_ionosphere_1.jpg');
-% load_ionosphere;
+% output_filename = ('./output/best_eta_adap_spambase_1.jpg');
+% load_spambase;
 % exp_best_eta_sc
 % 
 % clc; clear; close;
 % number_of_experiments = 50;
 % lambda1 = 10^(-4);
 % lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_adap_ionosphere_2.jpg');
-% load_ionosphere;
+% output_filename = ('./output/best_eta_adap_spambase_2.jpg');
+% load_spambase;
 % exp_best_eta_sc
-
-
-clc; clear; close;
-number_of_experiments = 50;
-lambda1 = 0;
-lambda2 = 10^(-6);
-output_filename = ('./output/best_eta_adap_spambase_1.jpg');
-load_spambase;
-exp_best_eta_sc
-
-clc; clear; close;
-number_of_experiments = 50;
-lambda1 = 10^(-4);
-lambda2 = 10^(-6);
-output_filename = ('./output/best_eta_adap_spambase_2.jpg');
-load_spambase;
-exp_best_eta_sc
-
-
-clc; clear; close;
-number_of_experiments = 50;
-lambda1 = 0;
-lambda2 = 10^(-6);
-output_filename = ('./output/best_eta_adap_artificial_1.jpg');
-load_artificial;
-exp_best_eta_sc
-
-clc; clear; close;
-number_of_experiments = 50;
-lambda1 = 10^(-4);
-lambda2 = 10^(-6);
-output_filename = ('./output/best_eta_adap_artificial_2.jpg');
-load_artificial;
-exp_best_eta_sc
+% 
+% 
+% clc; clear; close;
+% number_of_experiments = 50;
+% lambda1 = 0;
+% lambda2 = 10^(-6);
+% output_filename = ('./output/best_eta_adap_artificial_1.jpg');
+% load_artificial;
+% exp_best_eta_sc
+% 
+% clc; clear; close;
+% number_of_experiments = 50;
+% lambda1 = 10^(-4);
+% lambda2 = 10^(-6);
+% output_filename = ('./output/best_eta_adap_artificial_2.jpg');
+% load_artificial;
+% exp_best_eta_sc
 
 
 % clc; clear; close;

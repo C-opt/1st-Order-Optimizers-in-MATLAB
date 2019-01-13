@@ -21,7 +21,7 @@ opt_eta = 1.0/((1 + omega*(m+1)/b)*L_bar);
 parfor idx = 1: number_of_experiments
     fprintf('------------------------------EXPERIMENT NO. %d------------------------------\n', idx);                                                                                             
    [time_passes_DASVRDA_adres_sc(:,idx), obj_value_DASVRDA_ns(:,idx), w_DASVRDA_adres_sc] = DASVRDA_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, eta1, lambda1, lambda2, 1, innerPt_no);
-   [time_passes_DASVRDA_adres_sc_pflug(:,idx), obj_value_DASVRDA_pflug_ns(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_pflug_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, eta2, lambda1, lambda2, 1, innerPt_no); 
+   [all_S_pflug(:,idx), all_eta(:,idx),time_passes_DASVRDA_adres_sc_pflug(:,idx), obj_value_DASVRDA_pflug_ns(:,idx), w_DASVRDA_adres_sc_pflug] = DASVRDA_pflug_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, eta2, lambda1, lambda2, 1, innerPt_no); 
 end
 
 figure
@@ -36,3 +36,27 @@ DASVRDA_ns_legend = ['DASVRDA'];
 DASVRDA_pflug_ns_legend = ['Pflug + DASRVDA'];
 legend(DASVRDA_ns_legend, DASVRDA_pflug_ns_legend);
 saveas(gcf,output_filename)
+
+avg_S_pflug = sum(all_S_pflug,2)/number_of_experiments;
+avg_eta =  sum(all_eta,2)/number_of_experiments;
+
+subplot(2,1,1);
+plot(avg_S_pflug)
+
+y1 = 0.1;
+line([0,200],[y1,y1])
+y2 = 0.9;
+line([0,200],[y2,y2])
+
+xlim([0 200])
+title(['Pflug diagnostic behavior'])
+xlabel('#times Pflug has changed learning rate');
+ylabel('S Pflug value');
+
+subplot(2,1,2);
+plot(avg_eta)
+xlim([0 200])
+title(['Pflug diagnostic behavior'])
+xlabel('#times Pflug has changed learning rate');
+ylabel('Learning rate');
+saveas(gcf, output_diagnostic_filename);
