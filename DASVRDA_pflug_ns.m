@@ -43,6 +43,7 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
         x_previous = x;
         x_tilde_previous = x_tilde;
         tau = 0;
+        
         for k = 1:m
             z_previous_previous = z_previous;
             x_previous_previous = x_previous; 
@@ -70,21 +71,7 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
                 %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
             end
             
-            if(k > tau + burnin)
-                S_pflug = S_pflug/k;
-                all_S_pflug(s) = S_pflug;
-                all_eta(s) = eta;
-                UB = 0.90;
-                LB = 0.10;
 
-                if S_pflug < LB
-                    eta = eta*0.9;
-                elseif S_pflug > UB
-                    eta = eta*1.1;
-                end
-                S_pflug = 0;
-                tau = k;
-             end
 
             if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
                 count = count + 1;
@@ -96,6 +83,19 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
             end
         end
         
+        S_pflug = S_pflug/m;
+        all_S_pflug(s) = S_pflug;
+        all_eta(s) = eta;
+        
+        UB = 0.50;
+        LB = -0.50;
+
+        if S_pflug < LB
+            eta = eta*0.95;
+        elseif S_pflug > UB
+            eta = eta*1.05;
+        end
+
         x_tilde = x;
         z_tilde = z;
         

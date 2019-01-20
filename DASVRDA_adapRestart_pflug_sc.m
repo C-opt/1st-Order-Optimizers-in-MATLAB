@@ -73,27 +73,11 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
             x = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z;
             
-             if(k > 1)                   
+             if(k > 1)
                 term1 = ((x_previous - x_previous_previous)'*(x - x_previous))/(norm(x - x_previous)*norm(x_previous - x_previous_previous));
                 term2 = ((z_previous - z_previous_previous)'*(z - z_previous))/(norm(z - z_previous)*norm(z_previous - z_previous_previous));
                 S_pflug = S_pflug + 0.0*term1 + 1.0*term2;
                 %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
-             end
-             
-             if(k > tau + burnin)
-                S_pflug = S_pflug/k;
-                all_S_pflug(s) = S_pflug;
-                all_eta(s) = eta;
-                UB = 0.80;
-                LB = 0.10;
-
-                if S_pflug < LB
-                    eta = eta*0.95;
-                elseif S_pflug > UB
-                    eta = eta*1.05;
-                end
-                S_pflug = 0;
-                tau = k;
              end
              
               if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
@@ -101,6 +85,19 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
                 time_passes(count) = toc;
                 obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
              end
+        end
+        
+        S_pflug = S_pflug/m;
+        all_S_pflug(s) = S_pflug;
+        all_eta(s) = eta;
+
+        UB = 0.50;
+        LB = -0.50;
+
+        if S_pflug < LB
+            eta = eta*0.95;
+        elseif S_pflug > UB
+            eta = eta*1.05;
         end
         
         x_tilde = x;
