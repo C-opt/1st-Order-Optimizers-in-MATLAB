@@ -7,8 +7,8 @@ L = 0.25*ones(data_size,1);
 m = ceil(1.0*data_size/b);
 omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
-S = 50;
-T = 4;
+S = 150;
+T = 1;
 S_adres = S*T;
 
 innerPt_no = 3;
@@ -18,7 +18,7 @@ innerPt_no = 3;
 
 data_passes_DASVRDA_sc = DASVRDA_dataPass(data_size, m, b, S, T, innerPt_no);
 
-eta = zeros(1,9);
+eta = zeros(1,15);
 count = 1;
 for i = -2:1:2
     for j = 1:3
@@ -42,7 +42,7 @@ for eta_idx = 1:size(eta, 2)
     fprintf('eta = %1.2f\n', tmp_eta);
     parfor exp_idx = 1: number_of_experiments
 %         fprintf('---EXPERIMENT NO. %d---\n', exp_idx);
-        [time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta(exp_idx), lambda1, lambda2, 1, innerPt_no);
+        [~, ~, time_passes_DASVRDA_sc_1(:,exp_idx), obj_value_DASVRDA_sc_1(:,exp_idx), ~] = DASVRDA_adapRestart_pflug_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, S, tmp_eta, lambda1, lambda2, 1, innerPt_no);
     end
     mean_1 = mean(obj_value_DASVRDA_sc_1, 2);
     

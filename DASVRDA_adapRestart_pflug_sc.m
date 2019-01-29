@@ -1,4 +1,4 @@
-function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, eta, lambda1, lambda2, innerPt_no)
+function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestart_pflug_sc(X_train, Y_train, x_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
 
     [data_dim, data_size] = size(X_train);
     y_tilde = zeros(data_dim, 1);
@@ -11,7 +11,11 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
     time_passes = zeros(S*(1 + innerPt_no) + 1, 1);
     
     count = 1;
-    obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
+    
+    if experiment_boolean == 1
+        obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
+    end
+    
     z_tilde = x_tilde;
     x_tilde_previous = z_tilde;
     theta_tilde = 1.0 - 1.0/omega;
@@ -19,11 +23,14 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
     burnin = floor(m-1);
     
     tic
-    for s = 1: S
+    for s = 1:S
         
         S_pflug = 0;
         count = count + 1;
-        obj_value(count) = obj_value(count-1);
+        
+        if experiment_boolean == 1
+            obj_value(count) = obj_value(count-1);
+        end
         
         theta_tilde_previous = theta_tilde;
         
@@ -43,22 +50,21 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
         g_bar = zeros(data_dim,1);
         g = g_bar;
         g_previous = g;
+        g_previous_previous = g_previous;
         
         theta = 0.5;
         z_previous = z;
         x_previous = x;
         x_tilde_previous = x_tilde;
         tau = 0;
+        flag = 0;
+        
         for k = 1: m
             z_previous_previous = z_previous;
             x_previous_previous = x_previous; 
             x_previous = x;
             z_previous = z;
             g_bar_previous = g_bar;
-            
-            g_previous_previous = g_previous;
-            g_previous = g;
-            
             theta_previous = theta;
             
             rand_idx = randi([1, data_size], [1, b]); 
@@ -66,8 +72,10 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
             y = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z_previous;
             gradient = LogR2Gradient(0, rand_idx, y, X_train, Y_train);
             
-            sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
-            
+            %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
+            g_previous_previous = g_previous;
+            g_previous = g; 
             g = gradient - sum_each_component + full_gradient;
             g_bar = (1.0 - 1.0/theta)*g_bar_previous + 1.0/theta * g;
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
@@ -76,28 +84,32 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_adapRestar
              if(k > 1)
                 term1 = ((x_previous - x_previous_previous)'*(x - x_previous))/(norm(x - x_previous)*norm(x_previous - x_previous_previous));
                 term2 = ((z_previous - z_previous_previous)'*(z - z_previous))/(norm(z - z_previous)*norm(z_previous - z_previous_previous));
-                S_pflug = S_pflug + 0.0*term1 + 1.0*term2;
+                S_pflug = S_pflug + 0.0*term1 + 1.0*term2/(theta*theta_previous);
                 %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
+                %S_pflug = S_pflug + 1.0*(g_previous'*g)/(norm(g_previous)*norm(g)*(theta*theta_previous));
+                %S_pflug = S_pflug + 1.0*(g_previous'*g);
              end
              
               if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
                 count = count + 1;
-                time_passes(count) = toc;
-                obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+                time_passes(count) = toc; 
+                if experiment_boolean == 1
+                    obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
+                end
              end
         end
         
-        S_pflug = S_pflug/m;
+        S_pflug = S_pflug*(m+1)/(2*(m-1));
         all_S_pflug(s) = S_pflug;
         all_eta(s) = eta;
 
-        UB = 0.50;
-        LB = -0.50;
+        UB = 0.90;
+        LB = 0.00;
 
         if S_pflug < LB
-            eta = eta*0.95;
+            eta = eta*0.70;
         elseif S_pflug > UB
-            eta = eta*1.05;
+            eta = eta*1.40;
         end
         
         x_tilde = x;

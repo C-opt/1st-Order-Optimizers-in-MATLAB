@@ -12,7 +12,6 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = SVRG(X_train, Y_tr
     count = 1;
     obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x_tilde, X_train, Y_train);
     
-    
     tic
     for s = 1: S
         count = count + 1;
@@ -27,8 +26,9 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = SVRG(X_train, Y_tr
             rand_idx = randi([1, data_size], [1, b]); 
             gradient = LogR2Gradient(0, rand_idx, x, X_train, Y_train);
             
-            sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
-            
+            %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
+           
             g = gradient - sum_each_component + full_gradient;
             x = prox_map(x - eta*g, eta*lambda1, eta*lambda2);
              

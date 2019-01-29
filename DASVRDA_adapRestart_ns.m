@@ -1,6 +1,7 @@
-function  [time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
+function  [time_passes, obj_value, w] = DASVRDA_adapRestart_ns(X_train, Y_train, x_tilde, z_tilde, omega, L, m, b, S, eta, lambda1, lambda2, experiment_boolean, innerPt_no)
 
     [data_dim, data_size] = size(X_train);
+    y_tilde = zeros(data_dim, 1);
     innerPt_no = min(floor(sqrt(m)), innerPt_no);
     
     obj_value = zeros(S*(1 + innerPt_no) +1, 1);
@@ -19,6 +20,7 @@ function  [time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
         
         theta_tilde_previous = theta_tilde;
         theta_tilde = (1.0 - 1.0/omega)*(s+2)*0.5;
+        y_tilde_previous = y_tilde;
         y_tilde = x_tilde + (theta_tilde_previous - 1)/theta_tilde * (x_tilde - x_tilde_previous) + theta_tilde_previous/theta_tilde * (z_tilde - x_tilde);
         
         [full_gradient, eachComponent] = FullLogR2Gradient_eachComponent(0, x_tilde, X_train, Y_train);
@@ -28,6 +30,10 @@ function  [time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
         
         if experiment_boolean == 1
             obj_value(count) = obj_value(count-1);
+        end
+        
+        if((y_tilde_previous - x_tilde)'*(y_tilde - x_tilde) > 0)
+           theta_tilde =  1.0 - 1.0/omega;
         end
         
         x = y_tilde;
@@ -50,6 +56,7 @@ function  [time_passes, obj_value, w] = DASVRDA_ns(X_train, Y_train, x_tilde, z_
             %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
             sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
            
+            
             g = gradient - sum_each_component + full_gradient;
             g_bar = (1.0 - 1.0/theta)*g_bar_previous + 1.0/theta * g;
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);

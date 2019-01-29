@@ -27,45 +27,47 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = SVRG_adapRestart_p
         x = x_tilde;
         x_previous = x_tilde;
         x_previous_previous = x_previous;
+        g = zeros(data_dim,1);
+        g_previous = g;
         
         for k = 1: m
             rand_idx = randi([1, data_size], [1, b]); 
             gradient = LogR2Gradient(0, rand_idx, x, X_train, Y_train);
             
-            sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
-            
+            %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
+           
             x_previous_previous = x_previous;
             x_previous = x;
-            
+            g_previous = g;
             g = gradient - sum_each_component + full_gradient;
             x = prox_map(x - eta*g, eta*lambda1, eta*lambda2);
             
              if(k > 1)                 
                 term1 = ((x_previous - x_previous_previous)'*(x - x_previous))/(norm(x - x_previous)*norm(x_previous - x_previous_previous));
-                %term2 = ((z_previous - z_previous_previous)'*(z - z_previous))/(norm(z - z_previous)*norm(z_previous - z_previous_previous));
                 S_pflug = S_pflug + 1.0 * term1;
                 %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
+                %S_pflug = S_pflug + 1.0*(g_previous'*g)/(norm(g_previous)*norm(g));
              end
-             
-            S_pflug = S_pflug/m;
-            all_S_pflug(s) = S_pflug;
-            all_eta(s) = eta;
-            UB = 0.50;
-            LB = -0.50;
-
-            if S_pflug < LB
-                eta = eta*0.95;
-            elseif S_pflug > UB
-                eta = eta*1.05;
-            end
-            S_pflug = 0;
-             
               if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
                 count = count + 1;
                 time_passes(count) = toc;
                 obj_value(count) = obj_logreg_r1r2(lambda1, lambda2, x, X_train, Y_train);
              end
         end
+        
+        S_pflug = S_pflug/(m-1);
+        all_S_pflug(s) = S_pflug;
+        all_eta(s) = eta;
+        UB = 0.90;
+        LB = -0.00;
+
+        if S_pflug < LB
+            eta = eta*0.70;
+        elseif S_pflug > UB
+            eta = eta*1.40;
+        end
+        
         x_tilde = x;
     end
     w = x_tilde;

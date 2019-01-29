@@ -49,7 +49,9 @@ function  [time_passes, obj_value, w] = DASVRDA_adapRestart_sc(X_train, Y_train,
             y = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z_previous;
             gradient = LogR2Gradient(0, rand_idx, y, X_train, Y_train);
             
-            sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
+           
             
             g = gradient - sum_each_component + full_gradient;
             g_bar = (1.0 - 1.0/theta)*g_bar_previous + 1.0/theta * g;

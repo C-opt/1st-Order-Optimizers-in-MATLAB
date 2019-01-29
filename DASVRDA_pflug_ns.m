@@ -57,8 +57,9 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
             y = (1.0 - 1.0/theta)*x_previous + 1.0/theta*z_previous;
             gradient = LogR2Gradient(0, rand_idx, y, X_train, Y_train);
             
-            sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
-            
+            %sum_each_component = sum(eachComponent(:,rand_idx),2) * 1.0/b;
+            sum_each_component = eachComponent(:,rand_idx) * ones(size(rand_idx))' * 1.0/b;
+           
             g = gradient - sum_each_component + full_gradient;
             g_bar = (1.0 - 1.0/theta)*g_bar_previous + 1.0/theta * g;
             z = prox_map(y_tilde - eta*theta*theta_previous*g_bar, eta*theta*theta_previous*lambda1, eta*theta*theta_previous*lambda2);
@@ -71,8 +72,6 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
                 %S_pflug = S_pflug + 1.0*((g_previous - g_previous_previous)'*(g - g_previous))/(norm(g_previous - g_previous_previous)*norm(g - g_previous));
             end
             
-
-
             if rem(k, ceil(m/(innerPt_no + 1)) ) == 0 && k ~= m
                 count = count + 1;
                 time_passes(count) = toc;
@@ -87,13 +86,13 @@ function  [all_S_pflug, all_eta, time_passes, obj_value, w] = DASVRDA_pflug_ns(X
         all_S_pflug(s) = S_pflug;
         all_eta(s) = eta;
         
-        UB = 0.50;
-        LB = -0.50;
+        UB = 0.90;
+        LB = -0.00;
 
         if S_pflug < LB
-            eta = eta*0.95;
+            eta = eta*0.7;
         elseif S_pflug > UB
-            eta = eta*1.05;
+            eta = eta*1.4;
         end
 
         x_tilde = x;
