@@ -10,8 +10,8 @@ omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 
 S_adres = S*T;
 
-[~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, T, eta1, lambda1, lambda2, 0, innerPt_no);
-[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
+[~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, 4*T, eta1, lambda1, lambda2, 0, innerPt_no);
+[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-10));
 
 data_passes_DASVRDA_sc = DASVRDA_dataPass(data_size, m, b, S, T, innerPt_no);
 data_passes_DASVRDA = DASVRDA_dataPass(data_size, m, b, S_adres, 1, innerPt_no);
@@ -36,22 +36,6 @@ end
 xlimit = 200;
 
 figure
-
-% tmp = mean(obj_value_SVRG',1) - opt_value;
-% pretty_plot_obj_SVRG = semilogy(data_passes_SVRG(boolean_SVRG), tmp(boolean_SVRG), 'bs'); hold on;
-% pretty_plot_obj_SVRG.LineWidth = 2.0;
-% 
-% tmp = mean(obj_value_DASVRDA_sc',1) - opt_value;
-% pretty_plot_obj_perRes_DASVRDA = semilogy(data_passes_DASVRDA_sc(boolean_DASVRDA_sc), tmp(boolean_DASVRDA_sc), 'ro'); hold on;
-% pretty_plot_obj_perRes_DASVRDA.LineWidth = 2.0;
-% 
-% tmp = mean(obj_value_DASVRDA_adres_sc',1) - opt_value;
-% pretty_plot_obj_adapRes_DASVRDA = semilogy(data_passes_DASVRDA(boolean_DASVRDA), tmp(boolean_DASVRDA), 'kp'); hold on;
-% pretty_plot_obj_adapRes_DASVRDA.LineWidth = 2.0;
-% 
-% tmp = mean(obj_value_DASVRDA_adres_sc_pflug',1) - opt_value;
-% pretty_plot_obj_pflug_adapRes_DASVRDA = semilogy(data_passes_DASVRDA(boolean_DASVRDA), tmp(boolean_DASVRDA), 'mh'); hold on;
-% pretty_plot_obj_pflug_adapRes_DASVRDA.LineWidth = 2.0;
 
 plot_obj_SVRG = semilogy(data_passes_SVRG, mean(obj_value_SVRG',1) - opt_value, '-s'); hold on;
 plot_obj_SVRG.MarkerIndices = floor(20:size(data_passes_SVRG,1)/10:size(data_passes_SVRG,1));

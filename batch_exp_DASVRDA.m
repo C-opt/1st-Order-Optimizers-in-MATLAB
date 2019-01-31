@@ -75,8 +75,8 @@ S = 200;
 T = 5;
 exp_DASVRDA_ns;
 
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc; clear; close;
 output_filename = ('./output/exp_spambase_1.pdf');
 output_diagnostic_filename = ('./output/exp_spambase_diagnostic_1.pdf');
@@ -128,7 +128,7 @@ lambda2 = 0;
 
 eta1 = 5*10^(0);
 eta2 = 5*10^(0);
-eta3 = 1*10^(1);
+eta3 = 5*10^(0);
 eta4 = eta3;
 
 innerPt_no = 3;
@@ -137,7 +137,7 @@ S = 200;
 T = 5;
 exp_DASVRDA_ns;
 
-%
+
 clc; clear; close;
 output_filename = ('./output/exp_a9a_1.pdf');
 output_diagnostic_filename = ('./output/exp_a9a_diagnostic_1.pdf');
@@ -151,7 +151,7 @@ eta2 = 2*10^(1);
 eta3 = 2*10^(1);
 eta4 = 2*10^(0);
 
-innerPt_no = 3;
+innerPt_no = 5;
 number_of_experiments = 20;
 S = 25;
 T = 2;
@@ -187,8 +187,8 @@ lambda1 = 10^(-4);
 lambda2 = 0;
 
 eta1 = 5*10^(-1);
-eta2 = 2*10^(1);
-eta3 = 2*10^(1);
+eta2 = 1*10^(1);
+eta3 = 1*10^(1);
 eta4 = eta3;
 
 innerPt_no = 3;
@@ -197,7 +197,7 @@ S = 40;
 T = 5;
 exp_DASVRDA_ns;
 
-%
+
 clc; clear; close;
 output_filename = ('./output/exp_sido0_1.pdf');
 output_diagnostic_filename = ('./output/exp_sido0_diagnostic_1.pdf');
@@ -212,7 +212,7 @@ eta3 = 5*10^(0);
 eta4 = 1*10^(1);
 
 innerPt_no = 3;
-number_of_experiments = 20;
+number_of_experiments = 10;
 S = 25;
 T = 5;
 exp_DASVRDA_sc;

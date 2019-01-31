@@ -11,8 +11,8 @@ omega = 0.5*(3 + sqrt(9 + 8.0*b/(m+1)));
 T = 1;
 S_adres = S*T;
 
-[~, ~, w_DASVRDA_sc] = DASVRDA_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, m, b, S, 10, eta1, lambda1, lambda2, 0, innerPt_no);
-[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_sc, lambda1, lambda2, max_iter, 10^(-6));
+[~, ~, w_DASVRDA_ns] = DASVRDA_adapRestart_ns(X_train, Y_train, zeros(data_dim, 1), zeros(data_dim, 1), omega, L, m, b, 2*S, eta3, lambda1, lambda2, 0, innerPt_no);
+[opt_value, ~] = optimizer_APG(X_train, Y_train, w_DASVRDA_ns, lambda1, lambda2, max_iter, 10^(-7));
 
 data_passes_DASVRDA = DASVRDA_dataPass(data_size, m, b, S_adres, T, innerPt_no);
 data_passes_SVRG = DASVRDA_dataPass(data_size, 2.0*data_size/b, b, S_adres, 1, innerPt_no);
@@ -33,7 +33,7 @@ end
    %[~, ~, time_passes_SVRG_adres_sc_pflug(:,idx), obj_value_SVRG_adres_sc_pflug(:,idx), w_SVRG_adres_sc_pflug] = SVRG_adapRestart_pflug_sc(X_train, Y_train, zeros(data_dim, 1), omega, L, 2*data_size, 1, S_adres, eta3, lambda1, lambda2, innerPt_no);
    
 %%
-xlimit = 200;
+xlimit = 400;
 
 figure
 

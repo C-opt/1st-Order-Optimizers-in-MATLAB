@@ -4,7 +4,7 @@ lambda1 = 0;
 lambda2 = 10^(-6);
 S = 150;
 T = 1;
-output_filename = ('./output/best_eta_DASVRDA_adapRestart_sc_pflug_ionosphere_1.jpg');
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_ionosphere_1.pdf');
 load_ionosphere;
 exp_best_eta_sc
 
@@ -14,43 +14,50 @@ lambda1 = 10^(-4);
 lambda2 = 10^(-6);
 S = 150;
 T = 1;
-output_filename = ('./output/best_eta_DASVRDA_adapRestart_sc_pflug_ionosphere_2.jpg');
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_ionosphere_2.pdf');
 load_ionosphere;
 exp_best_eta_sc
 
-% clc; clear; close;
-% number_of_experiments = 50;
-% lambda1 = 10^(-4);
-% lambda2 = 0;
-% S = 40;
-% T = 1;
-% output_filename = ('./output/best_eta_DASVRDA_adapRestart_ns_pflug_ionosphere_3.jpg');
-% load_ionosphere;
-% exp_best_eta_ns
+clc; clear; close;
+number_of_experiments = 50;
+lambda1 = 10^(-4);
+lambda2 = 0;
+S = 150;
+T = 1;
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_ionosphere_3.pdf');
+load_ionosphere;
+exp_best_eta_ns
 
-% clc; clear; close;
-% number_of_experiments = 10;
-% lambda1 = 0;
-% lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_SVRG_spambase_1.jpg');
-% load_spambase;
-% exp_best_eta_sc
+clc; clear; close;
+number_of_experiments = 10;
+lambda1 = 0;
+lambda2 = 10^(-6);
+S = 150;
+T = 1;
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_spambase_1.pdf');
+load_spambase;
+exp_best_eta_sc
 % 
-% clc; clear; close;
-% number_of_experiments = 50;
-% lambda1 = 10^(-4);
-% lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_SVRG_spambase_2.jpg');
-% load_spambase;
-% exp_best_eta_sc
+clc; clear; close;
+number_of_experiments = 50;
+lambda1 = 10^(-4);
+lambda2 = 10^(-6);
+S = 150;
+T = 1;
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_spambase_2.pdf');
+load_spambase;
+exp_best_eta_sc
 % 
-% clc; clear; close;
-% number_of_experiments = 50;
-% lambda1 = 10^(-4);
-% lambda2 = 0;
-% output_filename = ('./output/best_eta_DASVRDA_adapRestart_spambase_3.jpg');
-% load_spambase;
-% exp_best_eta_ns
+
+clc; clear; close;
+number_of_experiments = 50;
+lambda1 = 10^(-4);
+lambda2 = 0;
+S = 150;
+T = 1;
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_spambase_3.pdf');
+load_spambase;
+exp_best_eta_ns
 
 % 
 % 
@@ -77,29 +84,35 @@ exp_best_eta_sc
 % load_artificial;
 % exp_best_eta_sc
 
-% clc; clear; close;
-% number_of_experiments = 50;
-% lambda1 = 0;
-% lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_SVRG_a9a_1.jpg');
-% load_a9a;
-% exp_best_eta_sc
+clc; clear; close;
+number_of_experiments = 20;
+lambda1 = 0;
+lambda2 = 10^(-6);
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_a9a_1.pdf');
+S = 150;
+T = 1;
+load_a9a;
+exp_best_eta_sc
 % 
-% clc; clear; close;
-% number_of_experiments = 50;
-% lambda1 = 10^(-4);
-% lambda2 = 10^(-6);
-% output_filename = ('./output/best_eta_SVRG_a9a_2.jpg');
-% load_a9a;
-% exp_best_eta_sc
+clc; clear; close;
+number_of_experiments = 20;
+lambda1 = 10^(-4);
+lambda2 = 10^(-6);
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_a9a_2.jpg');
+S = 150;
+T = 1;
+load_a9a;
+exp_best_eta_sc
 
-% clc; clear; close;
-% number_of_experiments = 70;
-% lambda1 = 10^(-4);
-% lambda2 = 0;
-% output_filename = ('./output/best_eta_DASVRDA_adapRestart_a9a_3.jpg');
-% load_a9a;
-% exp_best_eta_ns
+clc; clear; close;
+number_of_experiments = 20;
+lambda1 = 10^(-4);
+lambda2 = 0;
+output_filename = ('./output/best_eta_DASVRDA_adapRestart_a9a_3.jpg');
+S = 150;
+T = 1;
+load_a9a;
+exp_best_eta_ns
 
 % clc; clear; close;
 % output_filename = ('./output/best_eta_sido0_1.jpg');
